@@ -10,7 +10,7 @@ Server::~Server(){
 	close(sockfd);
 }
 
-Server::startServer(int portnumber){
+void Server::startServer(int portnumber){
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -23,7 +23,7 @@ Server::startServer(int portnumber){
 		  sizeof(server_address)) < 0) 
 		  error("ERROR on binding");
 	listen(sockfd,5);
-	clilen = sizeof(cli_addr);
+	clilen = sizeof(client_address);
 	newsockfd = accept(sockfd, 
 			 (struct sockaddr *) &client_address, 
 			 &clilen);

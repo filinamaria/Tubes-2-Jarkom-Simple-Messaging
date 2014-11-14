@@ -1,24 +1,27 @@
-#include <iostream>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h> 
-#include <unistd.h>
-#include <cstdlib>
-#include <errno.h>
-#include <cstring>
-#include <vector>
-
-using namespace std;
-
 #ifndef _SERVER_H
 #define _SERVER_H
+
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <unistd.h>
+#include <cstring>
+#include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <vector>
+#include "group.h"
+#include "user.h"
+
+using namespace std;
 
 class Server{
 	public: 
 		Server(int portnumber);
 		~Server();
-		startServer(int portnumber);
+		void startServer(int portnumber);
 		void error(const char *msg);
 		
 	private:

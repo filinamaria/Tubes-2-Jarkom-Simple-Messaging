@@ -37,7 +37,7 @@ class Server{
 		
 	private:
 		int portnumber;
-		//vector<Group> listofgroup;
+		vector<Group> listofgroup;
 		vector<User> listofuser;
 		vector<event> log;
 };

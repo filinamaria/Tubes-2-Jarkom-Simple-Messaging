@@ -13,10 +13,12 @@ using namespace std;
 
 class User {
 	public :
-		User(string username, string password); //constructor
+		User(); //Default constructor
+		User(string username, string password); //User-defined constructor
 		~User();
 		
 		/* Setter */
+		void setAccount(string username, string password);
 		void addInbox(Message& msg);
 		
 		/* Getter */

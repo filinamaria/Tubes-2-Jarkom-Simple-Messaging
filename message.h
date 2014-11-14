@@ -22,6 +22,7 @@ class Message {
 		
 		/* Getter */
 		time_t getTimestamp();
+		string getReadableTimestamp();
 		string getSender();
 		string getReceiver();
 		string getText();

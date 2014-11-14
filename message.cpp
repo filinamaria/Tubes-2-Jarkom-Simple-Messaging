@@ -39,6 +39,15 @@ time_t Message::getTimestamp() {
 	return this->timestamp;
 }
 
+string Message::getReadableTimestamp(){
+	tm * ptm = localtime(&timestamp);
+	cout << &ptm << endl;
+	char timestring[32];
+	strftime(timestring, 32, "%Y-%m-%d %H:%M:%S", ptm);  
+	string time(timestring);
+	return time;
+}
+
 string Message::getSender() {
 	return this->sender;
 }

@@ -41,4 +41,13 @@ void User::showInbox() {
 		cout << inbox[i].getSender() << " : " << inbox[i].getText() << endl;
 	}
 }
+
+void User::showMessages(string sender){
+	int inboxsize = this->inbox.size();
+	for (int i = 0; i < inboxsize; i++){
+		if(inbox[i].getSender() == sender){
+			
+		}
+	}
+}
 		

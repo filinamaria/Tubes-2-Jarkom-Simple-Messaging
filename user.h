@@ -26,7 +26,9 @@ class User {
 		string getPassword();
 		
 		/* Other */
-		void showInbox();
+		void showMessages(string sender);
+		void loadMessage();
+		
 		
 	private :
 		string username;

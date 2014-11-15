@@ -1,7 +1,7 @@
 #ifndef _SERVER_H
 #define _SERVER_H
 
-//#include "group.h"
+#include "group.h"
 #include "user.h"
 #include <iostream>
 #include <cstdio>
@@ -18,10 +18,13 @@
 using namespace std;
 
 class Server{
-	public: 
+	public:
 		Server(int portnumber);
 		~Server();
 		void startServer(int portnumber);
+		void loadUserList();
+		void receiveMessage();
+		void sendMessageToClient();
 		void error(const char *msg);
 		
 	private:
@@ -37,7 +40,7 @@ class Server{
 		
 	private:
 		int portnumber;
-		vector<Group> listofgroup;
+		//vector<Group> listofgroup;
 		vector<User> listofuser;
 		vector<event> log;
 };

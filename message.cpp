@@ -3,7 +3,7 @@
 Message::Message(string sender, string receiver) { //constructor
 	setSender(sender);
 	setReceiver(receiver);
-	setCurrentTimestamp();
+	this->timestamp = time(0);
 }
 
 Message::Message(const Message& m) { //copy constructor
@@ -29,9 +29,8 @@ void Message::setText(string text) {
 	this->text = text;
 }
 
-void Message::setCurrentTimestamp() {
-	time_t now = time(0);
-	this->timestamp = now;
+void Message::setTimestamp(time_t timestamp) {
+	this->timestamp = timestamp;
 }
 
 /* Getter */
@@ -49,5 +48,57 @@ string Message::getReceiver() {
 
 string Message::getText() {
 	return this->text;
+}
+
+/* Other */
+string Message::toString() {
+	stringstream ss;
+	ss << timestamp;
+	return "4;" + sender + ";" + receiver + ";" + ss.str() + ";" + text;
+}
+
+void Message::toMessage(string msg) {
+	/* local variables */
+	int i, len, x;
+	string temp = "";
+	time_t t_temp;
+	
+	/* algorithm */
+	if (msg[0]=='4') {
+		i = 2;
+		len = msg.length();
+		//sender
+		while (msg[i]!=';') {
+			temp = temp + msg[i];
+			i++;
+		}
+		setSender(temp);
+		temp = "";
+		//receiver
+		while (msg[i]!=';') {
+			temp = temp + msg[i];
+			i++;
+		}
+		setReceiver(temp);
+		temp = "";
+		//timestamp
+		while (msg[i]!=';') {
+			temp = temp + msg[i];
+			i++;
+		}
+		istringstream buffer(temp);
+		int x;
+		buffer >> x;
+		t_temp = time(0) + x;
+		setTimestamp(t_temp);
+		temp = "";
+		//message body
+		while (i<len) {
+			temp = temp + msg[i];
+			i++;
+		}
+		text = temp;
+	}
+	//else do nothing
 }
 

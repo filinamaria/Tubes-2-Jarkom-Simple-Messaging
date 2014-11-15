@@ -12,7 +12,7 @@ using namespace std;
 
 class Message {
 	public	:
-		Message(string sender, string receiver); //constructor
+		Message(string sender, string receiver, string text, string type); //constructor
 		Message(const Message& m); //copy constructor
 		~Message();
 		
@@ -21,12 +21,14 @@ class Message {
 		void setReceiver(string receiver);
 		void setText(string text);
 		void setTimestamp(time_t timestamp);
+		void setType(string type);
 		
 		/* Getter */
 		time_t getTimestamp();
 		string getSender();
 		string getReceiver();
 		string getText();
+		string getType();
 		
 		/* Other */
 		string toString();
@@ -39,6 +41,7 @@ class Message {
 		string receiver;
 		string text;
 		time_t timestamp;
+		string type; //personal or <group_name>
 };
 
 #endif

@@ -56,6 +56,8 @@ contoh :
 200; //selesai baikan
 
 
+default client ngirim pesan ke server menggunakan type = "personal". Nanti server yang akan mengurusi broadcast bila ternyata yang dituju merupakan group
+
 tata cara penyimpanan : 
 setiap dpt 200 message di flush, jgn tunggu logout baru simpan
 pas login, koneksi ke file lgsg dibuka, pas logout baru koneksi ditutup

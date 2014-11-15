@@ -13,7 +13,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <ctime>
+#include <sstream>
 using namespace std;
+
+#define bufferSize 1024
 
 class Client {
 	public :
@@ -31,13 +34,15 @@ class Client {
 		User getActiveUser();
 		
 		/* Other */
-		void connectToHost();
+		bool connectToHost();
 		void loadUserData();
 		void saveUserData();
 		void error(const char *msg);
 		void sendMessageToHost();
-		void receiveMessageFromHost();
+		string getMessageFromHost();
 		void commandMenu();
+		void processReply();
+		void processReplyUntilStop();
 	
 	private :
 		void signup();
@@ -49,6 +54,8 @@ class Client {
 		void leaveGroup();
 		void showMessages();
 		bool isUserLogged();
+		string getSubstr(const string& str, int start, char stop);
+		string getSubstrInt(const string& str, int start, int stop);
 		
 	private :
 		int portno;

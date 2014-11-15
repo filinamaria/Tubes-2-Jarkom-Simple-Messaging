@@ -45,7 +45,7 @@ void User::loadMessages() {
 	string line;
 	string path = "User/" + username + ".txt";
 	ifstream myfile(path.c_str());
-	Message temp("","");
+	Message temp("","","","");
 	
 	/* algorithm */
 	while (myfile.is_open()) {

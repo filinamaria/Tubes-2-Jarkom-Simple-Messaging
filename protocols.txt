@@ -49,8 +49,8 @@ protocols:
 
 setiap reply dari server kemudian server mengirim lagi balikan
 contoh :
-1;username;password
-1;success
+2;username;password
+2;success
 4;sender;receiver;timestamp;message;type
 4;sender;receiver;timestamp;message;type
 200; //selesai baikan

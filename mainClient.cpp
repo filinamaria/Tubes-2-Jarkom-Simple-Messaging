@@ -10,7 +10,8 @@ int main(int argc, char *argv[]) {
     
     Client clientHandler(portno, host);
     clientHandler.connectToHost();
-    //balikan sampai port bener
+    //clientHandler.processReply(); //minta reply sampai port bener
+    
     while (1) {
 		clientHandler.commandMenu();
 	}

@@ -37,7 +37,7 @@ User Client::getActiveUser() {
 }
 
 /* Other */
-void Client::connectToHost() {
+bool Client::connectToHost() {
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) { 
         error("ERROR opening socket");
@@ -57,7 +57,9 @@ void Client::connectToHost() {
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
+        return false;
 	}
+	else return true;
 }
 
 void Client::loadUserData() {
@@ -75,7 +77,7 @@ void Client::error(const char *msg) {
 
 void Client::sendMessageToHost() {
 	/* local variables */
-	char buffer[1024];
+	char buffer[bufferSize];
 	int n;
 	
 	/* algorithm */
@@ -84,32 +86,24 @@ void Client::sendMessageToHost() {
          error("ERROR writing to socket");
 }
 
-void Client::receiveMessageFromHost() {
+string Client::getMessageFromHost() {
 	/* local variables */
-	char buffer[1024];
+	char buffer[bufferSize];
 	int n;
 	
 	/* algorithm */
-	bzero(buffer,1024);
-    n = read(sockfd,buffer,1024);
+	bzero(buffer,bufferSize);
+    n = read(sockfd,buffer,bufferSize);
     if (n < 0) 
          error("ERROR reading from socket");
-    printf("%s\n",buffer);
-    
-    if (buffer[0]=='4') { //receive new message
-		string str(buffer);
-		Message temp(" "," ");
-		temp.toMessage(str);
-		printf("New Message(s)\n");
-		temp.showMessage();
-		activeUser.addInbox(temp);
-	}
+    string temp(buffer);
+    return temp;
 }
 
 void Client::commandMenu() {
 	/* local variables */
 	string command;
-	bool ok = false;
+	bool ok = false, waitUntilStop = true;
 	
 	/* algorithm */
 	printf("> ");
@@ -117,6 +111,7 @@ void Client::commandMenu() {
 	if (command=="signup") {
 		signup(); 
 		ok = true;
+		waitUntilStop = false;
 	}
 	else if (command=="login") {
 		if (!isUserLogged()) {
@@ -129,6 +124,7 @@ void Client::commandMenu() {
 		if (command=="logout") {
 			logout();
 			ok = true;
+			waitUntilStop = false;
 		}
 		else if (command=="message") {
 			message(); 
@@ -158,7 +154,92 @@ void Client::commandMenu() {
 	
 	if (ok) {
 		sendMessageToHost();
-		receiveMessageFromHost();
+		if (!waitUntilStop)
+			processReply();
+		else {
+			processReplyUntilStop();
+		}
+	}
+}
+
+void Client::processReply() {
+	/* local variables */
+	string temp, argv1, argv2;
+	string head;
+	bool stop = false;
+	
+	/* algorithm */
+	do { 
+		temp = getMessageFromHost();
+		head = getSubstr(temp, 0, ';');
+		if (head=="1") {
+			argv1 = getSubstr(temp, 2, ';');
+			if (argv1=="fail") {
+				argv2 = getSubstrInt(temp, 7, temp.length());
+				cout << argv2 << endl;
+			}
+			else { //success
+				stop = true;
+			}
+		}
+		else if (head=="3") {
+			argv1 = getSubstr(temp, 2, ';');
+			if (argv1=="success")
+				stop = true;
+		}
+		else { //head=="9"
+			argv1 = getSubstrInt(temp, 2, temp.length());
+			istringstream buffer(argv1);
+			int x;
+			buffer >> x;
+			setPortno(x);
+			if (connectToHost()) {
+				stop = true;
+				messageToHost = "9;success";
+			}
+			else {
+				messageToHost = "9;fail";
+			}
+			sendMessageToHost();
+		}
+	} while (!stop);
+}
+
+void Client::processReplyUntilStop() {
+	/* local variables */
+	string temp, argv1, argv2;
+	string head;
+	bool stop = false, written = false;
+	
+	/* algorithm */
+	temp = getMessageFromHost();
+	head = getSubstr(temp, 0, ';');
+	while (head!="200") {
+		argv1 = getSubstr(temp, 2, ';');
+		if (head=="2" || head=="5" || head=="6" || head=="7") {
+			if (argv1=="fail") {
+				argv2 = getSubstrInt(temp, 7, temp.length());
+				cout << endl << argv2 << endl;
+			}
+			if (head=="2" && argv1=="success") {
+				loadUserData();
+			}
+		}
+		else if (head=="4") {
+			if (argv1=="success") {
+				printf("Message Sent!");
+			}
+			else { //ini berarti ada message baru
+				if (!written) printf("New Message(s)\n"); 
+				Message msg("","","","");
+				msg.toMessage(temp);
+				activeUser.addInbox(msg);
+				msg.showMessage();
+				written = true;
+			}
+		}
+		temp = getMessageFromHost();
+		head = getSubstr(temp, 0, ';');
 	}
 }
 
@@ -177,10 +258,9 @@ void Client::login() {
 	string argvMessage1, argvMessage2; 
 	
 	/* algorithm */
-	printf("username : "); cin >> argvMessage1;
+	printf("username : "); cin >> argvMessage1; getchar();
 	printf("password : "); cin >> argvMessage2;
 	activeUser.setAccount(argvMessage1, argvMessage2);
-	loadUserData();
 	messageToHost = "2;" + argvMessage1 + ";" + argvMessage2;
 }
 
@@ -204,8 +284,7 @@ void Client::message() {
 	getchar();
 	printf("Message : \n");
 	getline(cin,argvMessage2); //text
-	Message newMsg(activeUser.getUsername(), argvMessage1);
-	newMsg.setText(argvMessage2);
+	Message newMsg(activeUser.getUsername(), argvMessage1, argvMessage2, "personal");
 	messageToHost = newMsg.toString();
 }
 
@@ -247,4 +326,22 @@ void Client::showMessages() {
 
 bool Client::isUserLogged() {
 	return !(activeUser.getUsername()=="" || activeUser.getUsername()==" ");
+}
+
+string Client::getSubstr(const string& str, int start, char stop) {
+	string temp="";
+	int i;
+	for (i=start; str[i]!=stop; i++) 
+		temp = temp + str[i];
+	start = i;
+	return temp;
+}
+
+string Client::getSubstrInt(const string& str, int start, int stop) {
+	string temp="";
+	int i;
+	for (i=start; i<stop; i++)
+		temp = temp + str[i];
+	start = i;
+	return temp;
 }

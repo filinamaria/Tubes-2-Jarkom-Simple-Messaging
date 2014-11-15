@@ -36,6 +36,10 @@ class Message {
 		void showReadableTimestamp();
 		void showMessage();
 		
+	private :
+		string getSubstr(const string& str, int& start, char stop);
+		string getSubstrInt(const string& str, int& start, int stop);
+		
 	private	:
 		string sender;
 		string receiver;

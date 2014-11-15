@@ -32,12 +32,22 @@ class Client {
 		
 		/* Other */
 		void connectToHost();
-		void loadUserData(string filename);
-		void saveUserData(string filename);
+		void loadUserData();
+		void saveUserData();
 		void error(const char *msg);
 		void sendMessageToHost();
 		void receiveMessageFromHost();
 		void commandMenu();
+	
+	private :
+		void signup();
+		void login();
+		void logout();
+		void message();
+		void createGroup();
+		void joinGroup();
+		void leaveGroup();
+		void showMessages();
 		
 	private :
 		int portno;

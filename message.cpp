@@ -75,6 +75,7 @@ void Message::toMessage(string msg) {
 		setSender(temp);
 		temp = "";
 		//receiver
+		i++;
 		while (msg[i]!=';') {
 			temp = temp + msg[i];
 			i++;
@@ -82,6 +83,7 @@ void Message::toMessage(string msg) {
 		setReceiver(temp);
 		temp = "";
 		//timestamp
+		i++;
 		while (msg[i]!=';') {
 			temp = temp + msg[i];
 			i++;
@@ -89,10 +91,11 @@ void Message::toMessage(string msg) {
 		istringstream buffer(temp);
 		int x;
 		buffer >> x;
-		t_temp = time(0) + x;
+		t_temp = x;
 		setTimestamp(t_temp);
 		temp = "";
 		//message body
+		i++;
 		while (i<len) {
 			temp = temp + msg[i];
 			i++;
@@ -100,5 +103,17 @@ void Message::toMessage(string msg) {
 		text = temp;
 	}
 	//else do nothing
+}
+
+void Message::showReadableTimestamp() {
+	time_t time = timestamp;
+	tm *ltm = localtime(&time);
+	cout << "[" << ltm->tm_year+1900 << "-" << ltm->tm_mon << "-" << ltm->tm_mday << " ";
+	cout << ltm->tm_hour << ":" << ltm->tm_min << "] ";
+}
+
+void Message::showMessage() {
+	showReadableTimestamp();
+	cout << sender << " : " << text << endl;
 }
 

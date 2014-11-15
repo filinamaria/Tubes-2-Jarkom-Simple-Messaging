@@ -31,6 +31,8 @@ class Message {
 		/* Other */
 		string toString();
 		void toMessage(string msg);
+		void showReadableTimestamp();
+		void showMessage();
 		
 	private	:
 		string sender;

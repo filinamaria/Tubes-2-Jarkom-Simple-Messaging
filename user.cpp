@@ -13,7 +13,7 @@ User::User(string username, string password) { //constructor
 User::~User() {}
 
 /* Setter */
-void User::addMessageToInbox(Message& msg) {
+void User::addInbox(Message& msg) {
 	inbox.push_back(msg);
 }
 
@@ -32,27 +32,36 @@ string User::getPassword() {
 }
 
 /* Other */
-void User::showMessages(string sender){
-	int inboxsize = this->inbox.size();
-	for (int i = 0; i < inboxsize; i++){
-		if(inbox[i].getSender() == sender){
-			cout << inbox[i].showReadableTimestamp() << " " << inbox[i].getSender() << " : " << inbox[i].getText() << endl;
+void User::showMessages(string sender) {
+	for (int i=0; i<this->inbox.size(); i++) {
+		if (inbox[i].getSender()==sender) {
+			inbox[i].showMessage();
 		}
 	}
 }
 
-void User::loadMessages(){
+void User::loadMessages() {
+	/* local variables */
+	string line;
+	ifstream myfile("User/" + username + ".txt");
+	Message temp("","");
 	
-}
-
-void User::saveMessages(){
-	string Path("/User/" + username + ".txt");
-	ifstream userfile (Path);
-	if(userfile.is_open()){
-		while(userfile.good()){
-			
+	/* algorithm */
+	while (myfile.is_open()) {
+		while (getline(myfile, line)) {
+			temp.toMessage(line);
+			inbox.push_back(temp);
 		}
-		
+		myfile.close();
 	}
 }
-		
+
+void User::saveMessages() {
+	ofstream myfile("User/" + username + ".txt");
+	if (myfile.is_open()) {
+		for (int i=0; i < inbox.size(); i++) {
+			myfile << inbox[i].toString() << endl;
+		}
+		myfile.close();
+	}
+}

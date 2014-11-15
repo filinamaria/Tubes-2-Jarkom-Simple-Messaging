@@ -60,11 +60,12 @@ void Client::connectToHost() {
 	}
 }
 
-void Client::loadUserData(string filename) {
+void Client::loadUserData() {
+	activeUser.loadMessages();
 }
 
-void Client::saveUserData(string filename) {
-
+void Client::saveUserData() {
+	activeUser.saveMessages();
 }
 
 void Client::error(const char *msg) {
@@ -98,43 +99,132 @@ void Client::receiveMessageFromHost() {
 
 void Client::commandMenu() {
 	/* local variables */
-	string command, argvMessage1, argvMessage2; 
+	string command;
+	bool ok;
 	
 	/* algorithm */
 	printf("> ");
 	cin >> command;
 	if (command=="signup") {
-		printf("username : "); cin >> argvMessage1;
-		printf("password : "); cin >> argvMessage2;
-		messageToHost = "1;" + argvMessage1 + ";" + argvMessage2;
-		sendMessageToHost();
-		receiveMessageFromHost();
+		signup(); 
+		ok = true;
 	}
 	else if (command=="login") {
-		printf("username : "); cin >> argvMessage1;
-		printf("password : "); cin >> argvMessage2;
-		messageToHost = "2;" + argvMessage1 + ";" + argvMessage2;
-		sendMessageToHost();
-		receiveMessageFromHost();
+		login(); 
+		ok = true;
 	}
 	else if (command=="logout") {
-		printf("username : "); cin >> argvMessage1;
-		messageToHost = "3;" + argvMessage1;
-		sendMessageToHost();
-		receiveMessageFromHost();
+		logout(); 
+		ok = true;
 	}
 	else if (command=="message") {
-		cin >> argvMessage1; //receiver
-		getchar();
-		printf("Message : \n");
-		getline(cin,argvMessage2); //text
-		Message newMsg(activeUser.getUsername(), argvMessage1);
-		newMsg.setText(argvMessage2);
-		messageToHost = newMsg.toString();
-		sendMessageToHost();
-		receiveMessageFromHost();
+		message(); 
+		ok = true;
+	}
+	else if (command=="create") {
+		createGroup();
+		ok = true;
+	}
+	else if (command=="join") {
+		joinGroup();
+		ok = true;
+	}
+	else if (command=="leave") {
+		leaveGroup();
+		ok = true;
+	}
+	else if (command=="show") {
+		showMessages();
+		ok = true;
 	}
 	else {
 		printf("Belum siap kaka\n");
+		ok = false;
 	}
+	
+	if (ok) {
+		sendMessageToHost();
+		receiveMessageFromHost();
+	}
+}
+
+void Client::signup() {
+	/* local variables */
+	string argvMessage1, argvMessage2; 
+	
+	/* algorithm */
+	printf("username : "); cin >> argvMessage1;
+	printf("password : "); cin >> argvMessage2;
+	messageToHost = "1;" + argvMessage1 + ";" + argvMessage2;
+}
+
+void Client::login() {
+	/* local variables */
+	string argvMessage1, argvMessage2; 
+	
+	/* algorithm */
+	printf("username : "); cin >> argvMessage1;
+	printf("password : "); cin >> argvMessage2;
+	activeUser.setAccount(argvMessage1, argvMessage2);
+	messageToHost = "2;" + argvMessage1 + ";" + argvMessage2;
+}
+
+void Client::logout() {
+	/* local variables */
+	string argvMessage1, argvMessage2; 
+	
+	/* algorithm */
+	printf("username : "); cin >> argvMessage1;
+	activeUser.setAccount(" ", " ");
+	messageToHost = "3;" + argvMessage1;
+}
+
+void Client::message() {
+	/* local variables */
+	string argvMessage1, argvMessage2; 
+	
+	/* algorithm */
+	cin >> argvMessage1; //receiver
+	getchar();
+	printf("Message : \n");
+	getline(cin,argvMessage2); //text
+	Message newMsg(activeUser.getUsername(), argvMessage1);
+	newMsg.setText(argvMessage2);
+	messageToHost = newMsg.toString();
+}
+
+void Client::createGroup() {
+	/* local variables */
+	string argvMessage1;
+	
+	/* algorithm */
+	cin >> argvMessage1;
+	messageToHost = "5;" + argvMessage1;
+}
+
+void Client::joinGroup() {
+	/* local variables */
+	string argvMessage1;
+	
+	/* algorithm */
+	cin >> argvMessage1;
+	messageToHost = "6;" + argvMessage1;
+}
+
+void Client::leaveGroup() {
+	/* local variables */
+	string argvMessage1;
+	
+	/* algorithm */
+	cin >> argvMessage1;
+	messageToHost = "7;" + argvMessage1;
+}
+
+void Client::showMessages() {
+	/* local variables */
+	string argvMessage1;
+	
+	/* algorithm */
+	cin >> argvMessage1;
+	messageToHost = "8;" + argvMessage1 + ";" + activeUser.getUsername();
 }

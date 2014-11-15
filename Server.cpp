@@ -2,15 +2,14 @@
 
 Server::Server(int portnumber){
 	this->portnumber = portnumber;
-	Server::startServer(portnumber);
+	startServer(portnumber);
 }
 
 Server::~Server(){
-	close(newsockfd);
-	close(sockfd);
+	
 }
 
-void Server::startServer(int portnumber){
+Server::startServer(int portnumber){
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0) 
 		error("ERROR opening socket");
@@ -23,12 +22,20 @@ void Server::startServer(int portnumber){
 		  sizeof(server_address)) < 0) 
 		  error("ERROR on binding");
 	listen(sockfd,5);
-	clilen = sizeof(client_address);
+	clilen = sizeof(cli_addr);
 	newsockfd = accept(sockfd, 
 			 (struct sockaddr *) &client_address, 
 			 &clilen);
 	if (newsockfd < 0) 
 	  error("ERROR on accept");
+	bzero(buffer,1024);
+	n = read(newsockfd,buffer,255);
+	if (n < 0) error("ERROR reading from socket");
+	printf("Here is the message: %s\n",buffer);
+	n = write(newsockfd,"I got your message",18);
+	if (n < 0) error("ERROR writing to socket");
+	close(newsockfd);
+	close(sockfd);
 }
 
 void Server::error(const char *msg){

@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <ctime>
 using namespace std;
 
 class Client {
@@ -46,6 +47,7 @@ class Client {
 		string messageToHost;
 		string hostname;
 		User activeUser;
+		bool all;
 };
 
 #endif

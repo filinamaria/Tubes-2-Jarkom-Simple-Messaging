@@ -3,9 +3,11 @@
 
 #include <iostream>
 #include <cstdio>
-#include <string>
+#include <cstring>
+#include <cstdlib>
 #include <ctime>
 #include <string>
+#include <sstream>
 using namespace std;
 
 class Message {
@@ -18,14 +20,17 @@ class Message {
 		void setSender(string sender);
 		void setReceiver(string receiver);
 		void setText(string text);
-		void setCurrentTimestamp();
+		void setTimestamp(time_t timestamp);
 		
 		/* Getter */
 		time_t getTimestamp();
-		string getReadableTimestamp();
 		string getSender();
 		string getReceiver();
 		string getText();
+		
+		/* Other */
+		string toString();
+		void toMessage(string msg);
 		
 	private	:
 		string sender;

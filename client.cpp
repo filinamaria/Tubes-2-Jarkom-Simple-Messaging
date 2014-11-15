@@ -3,6 +3,7 @@
 Client::Client(int portno, string hostname) { //constructor
 	setPortno(portno);
 	setHostname(hostname);
+	all = false;
 }
 
 Client::~Client() {
@@ -105,7 +106,31 @@ void Client::commandMenu() {
 	if (command=="signup") {
 		printf("username : "); cin >> argvMessage1;
 		printf("password : "); cin >> argvMessage2;
-		messageToHost = command + ";" + argvMessage1 + ";" + argvMessage2;
+		messageToHost = "1;" + argvMessage1 + ";" + argvMessage2;
+		sendMessageToHost();
+		receiveMessageFromHost();
+	}
+	else if (command=="login") {
+		printf("username : "); cin >> argvMessage1;
+		printf("password : "); cin >> argvMessage2;
+		messageToHost = "2;" + argvMessage1 + ";" + argvMessage2;
+		sendMessageToHost();
+		receiveMessageFromHost();
+	}
+	else if (command=="logout") {
+		printf("username : "); cin >> argvMessage1;
+		messageToHost = "3;" + argvMessage1;
+		sendMessageToHost();
+		receiveMessageFromHost();
+	}
+	else if (command=="message") {
+		cin >> argvMessage1; //receiver
+		getchar();
+		printf("Message : \n");
+		getline(cin,argvMessage2); //text
+		Message newMsg(activeUser.getUsername(), argvMessage1);
+		newMsg.setText(argvMessage2);
+		messageToHost = newMsg.toString();
 		sendMessageToHost();
 		receiveMessageFromHost();
 	}

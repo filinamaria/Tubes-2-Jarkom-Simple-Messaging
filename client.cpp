@@ -95,12 +95,21 @@ void Client::receiveMessageFromHost() {
     if (n < 0) 
          error("ERROR reading from socket");
     printf("%s\n",buffer);
+    
+    if (buffer[0]=='4') { //receive new message
+		string str(buffer);
+		Message temp(" "," ");
+		temp.toMessage(str);
+		printf("New Message(s)\n");
+		temp.showMessage();
+		activeUser.addInbox(temp);
+	}
 }
 
 void Client::commandMenu() {
 	/* local variables */
 	string command;
-	bool ok;
+	bool ok = false;
 	
 	/* algorithm */
 	printf("> ");
@@ -110,36 +119,41 @@ void Client::commandMenu() {
 		ok = true;
 	}
 	else if (command=="login") {
-		login(); 
-		ok = true;
+		if (!isUserLogged()) {
+			login(); 
+			ok = true;
+		}
+		else printf("Someone already logged in!");
 	}
-	else if (command=="logout") {
-		logout(); 
-		ok = true;
-	}
-	else if (command=="message") {
-		message(); 
-		ok = true;
-	}
-	else if (command=="create") {
-		createGroup();
-		ok = true;
-	}
-	else if (command=="join") {
-		joinGroup();
-		ok = true;
-	}
-	else if (command=="leave") {
-		leaveGroup();
-		ok = true;
-	}
-	else if (command=="show") {
-		showMessages();
-		ok = true;
+	else if (isUserLogged()) {
+		if (command=="logout") {
+			logout();
+			ok = true;
+		}
+		else if (command=="message") {
+			message(); 
+			ok = true;
+		}
+		else if (command=="create") {
+			createGroup();
+			ok = true;
+		}
+		else if (command=="join") {
+			joinGroup();
+			ok = true;
+		}
+		else if (command=="leave") {
+			leaveGroup();
+			ok = true;
+		}
+		else if (command=="show") {
+			showMessages();
+			ok = true;
+		}
+		else printf("wrong command!\n");
 	}
 	else {
-		printf("Belum siap kaka\n");
-		ok = false;
+		printf("wrong command!\n");
 	}
 	
 	if (ok) {
@@ -229,4 +243,8 @@ void Client::showMessages() {
 	/* algorithm */
 	cin >> argvMessage1;
 	messageToHost = "8;" + argvMessage1 + ";" + activeUser.getUsername();
+}
+
+bool Client::isUserLogged() {
+	return !(activeUser.getUsername()=="" || activeUser.getUsername()==" ");
 }

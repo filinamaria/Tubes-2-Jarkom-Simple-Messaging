@@ -9,12 +9,11 @@
 #include <vector>
 #include <iterator>
 #include <string>
-#include <fstream>
 using namespace std;
 
 class User {
 	public :
-		User();
+		User(); //constructor
 		User(string username, string password); //constructor
 		~User();
 		
@@ -27,9 +26,7 @@ class User {
 		string getPassword();
 		
 		/* Other */
-		void showMessages(string sender);
-		void loadMessages();
-		void saveMessages();
+		void showInbox();
 		
 	private :
 		string username;

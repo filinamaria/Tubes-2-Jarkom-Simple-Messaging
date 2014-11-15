@@ -48,6 +48,7 @@ class Client {
 		void joinGroup();
 		void leaveGroup();
 		void showMessages();
+		bool isUserLogged();
 		
 	private :
 		int portno;

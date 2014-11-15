@@ -18,7 +18,7 @@ class User {
 		~User();
 		
 		/* Setter */
-		void addInbox(Message& msg);
+		void addMessageToInbox(Message& msg);
 		void setAccount(string username, string password);
 		
 		/* Getter */
@@ -27,9 +27,9 @@ class User {
 		
 		/* Other */
 		void showMessages(string sender);
-		void loadMessage();
-		
-		
+		void loadMessages();
+		void saveMessages();
+				
 	private :
 		string username;
 		string password;

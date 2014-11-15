@@ -13,7 +13,7 @@ User::User(string username, string password) { //constructor
 User::~User() {}
 
 /* Setter */
-void User::addInbox(Message& msg) {
+void User::addMessageToInbox(Message& msg) {
 	inbox.push_back(msg);
 }
 
@@ -32,22 +32,27 @@ string User::getPassword() {
 }
 
 /* Other */
-void User::showInbox() {
-	for (int i=0; i<this->inbox.size(); i++) {
-		time_t time = inbox[i].getTimestamp();
-		tm *ltm = localtime(&time);
-		cout << "[" << ltm->tm_year+1900 << "-" << ltm->tm_mon << "-" << ltm->tm_mday << " ";
-		cout << ltm->tm_hour << ":" << ltm->tm_min << "] ";
-		cout << inbox[i].getSender() << " : " << inbox[i].getText() << endl;
-	}
-}
-
 void User::showMessages(string sender){
 	int inboxsize = this->inbox.size();
 	for (int i = 0; i < inboxsize; i++){
 		if(inbox[i].getSender() == sender){
+			cout << inbox[i].showReadableTimestamp() << " " << inbox[i].getSender() << " : " << inbox[i].getText() << endl;
+		}
+	}
+}
+
+void User::loadMessages(){
+	
+}
+
+void User::saveMessages(){
+	string Path("/User/" + username + ".txt");
+	ifstream userfile (Path);
+	if(userfile.is_open()){
+		while(userfile.good()){
 			
 		}
+		
 	}
 }
 		

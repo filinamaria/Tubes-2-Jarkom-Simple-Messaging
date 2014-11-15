@@ -166,6 +166,7 @@ void Client::login() {
 	printf("username : "); cin >> argvMessage1;
 	printf("password : "); cin >> argvMessage2;
 	activeUser.setAccount(argvMessage1, argvMessage2);
+	loadUserData();
 	messageToHost = "2;" + argvMessage1 + ";" + argvMessage2;
 }
 
@@ -175,6 +176,7 @@ void Client::logout() {
 	
 	/* algorithm */
 	printf("username : "); cin >> argvMessage1;
+	saveUserData();
 	activeUser.setAccount(" ", " ");
 	messageToHost = "3;" + argvMessage1;
 }

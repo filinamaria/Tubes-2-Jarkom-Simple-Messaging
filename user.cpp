@@ -43,7 +43,8 @@ void User::showMessages(string sender) {
 void User::loadMessages() {
 	/* local variables */
 	string line;
-	ifstream myfile("User/" + username + ".txt");
+	string path = "User/" + username + ".txt";
+	ifstream myfile(path.c_str());
 	Message temp("","");
 	
 	/* algorithm */
@@ -57,7 +58,8 @@ void User::loadMessages() {
 }
 
 void User::saveMessages() {
-	ofstream myfile("User/" + username + ".txt");
+	string path = "User/" + username + ".txt";
+	ofstream myfile(path.c_str());
 	if (myfile.is_open()) {
 		for (int i=0; i < inbox.size(); i++) {
 			myfile << inbox[i].toString() << endl;

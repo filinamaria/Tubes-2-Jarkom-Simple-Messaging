@@ -16,6 +16,8 @@ protocols:
 
 8. show messages:	8;sender;receiver
 
+9. change port number 9;port_number
+
 
 
 

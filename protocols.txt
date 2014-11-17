@@ -19,6 +19,8 @@ protocols:
 
 
 /* perlu balikan 200 */
+*ada tambahan : yang bagian server ngasi banyak balikan, si client juga harus ngasi balikan 200 (artinya terima sesuatu), biar speed transfernya sama
+
 2. Login:		2;username;password //kalau udah login gaboleh login lagi
 				<server - balikan>
 				2;success

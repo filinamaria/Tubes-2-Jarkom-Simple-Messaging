@@ -238,6 +238,8 @@ void Client::processReplyUntilStop() {
 				written = true;
 			}
 		}
+		messageToHost = "200;";
+		sendMessageToHost();
 		temp = getMessageFromHost();
 		head = getSubstr(temp, 0, ';');
 	}

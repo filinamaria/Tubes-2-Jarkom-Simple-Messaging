@@ -8,40 +8,51 @@
 #include <string>
 #include <vector>
 #include <iterator>
-#include "message.cpp"
+#include <algorithm>
+#include <sstream>
+#include <fstream>
+
 using namespace std;
 
 class Group {
-	public :
-		Group(string name); //constructor
+	public:
+		Group();
+		Group(string groupname);
 		~Group();
 		
-		void join(string name);
-		void sendMessage(Message msg); //dr client ada mekanisme utk menyimpan message yang sudah sampai
-		void savePendingMessage(Message& msg);
-		void leave(string name);
-		void createEvent();
-		void showLog();
+		/* setter */
+		void setGroupName(string groupname);
 		
-		/* I/O */
-		void loadData(string filename);
-		void updateData(string filename);
-	private :
-		typedef struct {
-			string username;
-			time_t joinTime;
-		} Member;		
+		/* method addMember: return 0 jika gagal menambah user (user sudah ada), return 1 jika berhasil.
+		 * 					 Menambah member ke vector sekaligus external file
+		 */				 
+		int addMember(string username);
 		
-		typedef struct {
-			time_t timestamp;
-			string news;
-		} Event;
-
-	private :
+		/* method addLog: Menambah log ke vector sekaligus external file */ 
+		void addLog(string log, time_t timestamp);
+		
+		/* getter */
+		string getGroupName();
+		vector<string> getMemberList();
+		vector<string> getLogList();
+		
+		/* other methods */
+		/* method delMember: return 0 jika gagal (user tidak ada), return 1 jika berhasil
+		 *			         Delete member dari vector dan external file
+		 */
+		int delMember(string username);
+		void loadMemberFromExternalFile();
+		void loadLogFromExternalFile();
+		
+	private: 
+		void deleteMemberFromExternalFile(string username);
+		void saveMember(string username);
+		void saveLog(string log);
+		
+	private:
 		string groupname;
-		vector<Member> members;
-		vector<Message> messages; //act as pending message in server-side, act as received message in client-side
-		vector<Event> events;
+		vector<string> member;
+		vector<string> log;
 };
 
 #endif

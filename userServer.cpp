@@ -114,7 +114,6 @@ void UserServer::deleteMessageFromExternalFile(string message){
 	for(int i = 0; i < (int)file.size(); ++i){
 		if(file[i].substr(0, item.length()) == item){		
 			file.erase(file.begin() + i);
-			cout << "Order erased!"<< endl;
 			i = 0;
 		}
 	}

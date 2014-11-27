@@ -1,11 +1,25 @@
-compile : mainClient.cpp user.o client.o message.o
-	g++ -o client mainClient.cpp usero client.o message.o
 
-user.o : user.cpp user.h
-	g++ -o user.cpp
 
-client.o : client.c client.h
-	g++ -o client.c
+CC=g++
+CFLAGS=-I
 
-message.o : message.cpp message.h
-	g++ -o message.cpp
+instruction : 
+	@echo usage:
+	@echo make client
+	@echo make server
+	@echo make clean
+
+server : mainServer.cpp server.cpp userServer.cpp message.cpp group.cpp
+	g++ -o server mainServer.cpp server.cpp userServer.cpp message.cpp group.cpp
+
+client : mainClient.cpp client.cpp message.cpp user.cpp
+	g++ -o client mainClient.cpp client.cpp message.cpp user.cpp
+
+server.o : server.cpp
+	g++ -c server.cpp
+
+clean :
+	rm -f server client
+
+.PHONY: clean
+.PHONY: instruction

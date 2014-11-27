@@ -3,26 +3,26 @@ protocols:
 //user ngirim dulu, lalu server menjawab
 
 /* ga perlu balikan 200 */
-1. Signup:		1;username;password //kalau udah ada, dikasih balikan gagal oleh server
-				<server - balikan>
-				1;success
-				1;fail;reason
+1. Signup:			1;username;password //kalau udah ada, dikasih balikan gagal oleh server
+					<server - reply>
+					1;success
+					1;fail;reason
 
-3. Logout:		3;username //kalau tidak ada yang login, gk bisa logout
-				<server - balikan> 
-				3;success //stlh dapet balesan dr server, dilogout di komputer client
+3. Logout:			3;username //kalau tidak ada yang login, gk bisa logout
+					<server - reply> 
+					3;success //stlh dapet balesan dr server, dilogout di komputer client
 
-9. change port number 		9;port_number //dariserver ke client kemudian client menjawab
-							<client - reply>
-							9;success
-							9;fail
+9. change port		9;port_number //dariserver ke client kemudian client menjawab
+					<client - reply>
+					9;success
+					9;fail
 
 
 /* perlu balikan 200 */
-2. Login:		2;username;password //kalau udah login gaboleh login lagi
-				<server - balikan>
-				2;success
-				2;fail;reason
+2. Login:			2;username;password //kalau udah login gaboleh login lagi
+					<server - balikan>
+					2;success
+					2;fail;reason
 
 4. Send message:	4;sender;receiver;timestamp;message;type //dikirim ke server, kalau sudah berhasil ngirim, maka server ngasi balesan "message sent"
 					<server - balikan>

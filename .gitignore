@@ -1,1 +1,7 @@
 /nbproject/
+/client
+/server
+/jarkomSrv/build/
+/jarkomSrv/dist/
+/jarkomSrv/nbproject/
+/jarkomSrv/makefile

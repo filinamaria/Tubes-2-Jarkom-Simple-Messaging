@@ -4,7 +4,6 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-    char buffer[256];
 	
 	if(argc < 2) {
 		cout << endl << " ==== WMD MESSENGER -- CLIENT ==== " << endl;

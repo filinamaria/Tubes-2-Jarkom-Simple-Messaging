@@ -172,6 +172,9 @@ void Client::processReply() {
 	do { 
 		temp = getMessageFromHost();
 		head = getSubstr(temp, 0, ';');
+		
+		cout << "HEAD IS " << head << endl;
+		
 		if (head=="1") {
 			argv1 = getSubstr(temp, 2, ';');
 			if (argv1=="fail") {
@@ -184,10 +187,11 @@ void Client::processReply() {
 		}
 		else if (head=="3") {
 			argv1 = getSubstr(temp, 2, ';');
+			stop = true;
 			if (argv1=="success")
 				stop = true;
 		}
-		else { //head=="9"
+		/*else { //head=="9"
 			argv1 = getSubstrInt(temp, 2, temp.length());
 			istringstream buffer(argv1);
 			int x;
@@ -201,7 +205,7 @@ void Client::processReply() {
 				messageToHost = "9;fail";
 			}
 			sendMessageToHost();
-		}
+		}*/
 	} while (!stop);
 }
 

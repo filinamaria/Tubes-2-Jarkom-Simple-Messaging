@@ -11,6 +11,7 @@
 #include "group.h"
 #include "userServer.h"
 #include "message.h"
+#include "server.h"
 #include <iostream>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -21,6 +22,7 @@
 #include <errno.h>
 #include <cstring>
 #include <vector>
+#include <ctime>
 
 #include <thread>
 #include <mutex>
@@ -29,41 +31,47 @@
 
 using namespace std;
 
+class Server;
+
 class SrvInstance {
 public:
 	SrvInstance(const SrvInstance&);
-	
-	//init new server
-	SrvInstance(int sockid);
-	
+	SrvInstance(int sockid); //init new server
 	virtual ~SrvInstance();
-	
-	//Threaded function to be called ONCE from serverThread
+private:
+	//Thread init function to be called ONCE
 	void initThread();
 	
 	// send message
 	void sendMessageToClient();
 	
-	//event handlers
-	void signup();
-	void login();
-	void logout();
-	void rcvMessage();
-	void createGroup();
-	void joinGroup();
-	void leaveGroup();
+	// send all pending messages. do this after every command that requires 200 retcode.
+	void sendAllPending();
 	
+	//getter
+	bool isDead();
+	int getSockID();
+	
+	//event handlers
+	void signup(const string& usrName, const string& pass); //DONE
+	void login(const string& usrName, const string& pass); //DONE
+	void logout(); //DUN
+	void rcvMessage(Message msg);
+	void createGroup(const string& name);
+	void joinGroup(const string& name);
+	void leaveGroup(const string& name);
+	
+	//sendMessage function
+	void sendMessageTo(const vector<string>& users, Message msg);
 	
 	//utility functions
 	string getSubstr(const string& str, int start, char stop);
+	string getSubstrAdv(const string& str, int start, char delimiter);
 	string getSubstrInt(const string& str, int start, int stop);
-	
 	void error(const char *msg);
-	bool isDead();
+	static bool fileExists(const string& name);
 	
-	int getSockID();
-	
-private:
+private: //vars
 	UserServer usr;
 	string messageBuf;
 	int sockID;
@@ -71,6 +79,7 @@ private:
 	
 	int sockErrCode;
 	bool killFlag;
+	bool connected;
 
 };
 

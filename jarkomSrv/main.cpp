@@ -25,10 +25,10 @@ int main(int argc, char** argv) {
 	}
 
 	cout << endl << " ==== WMD MESSENGER -- SERVER ==== " << endl;
-	cout << "Starting Server..." << endl;
+	cout << "Server initialization sequence started." << endl;
 	int portno = atoi(argv[1]);
 
-	Server serverHandler(portno);
+	Server server(portno);
 	return 0;
 }
 

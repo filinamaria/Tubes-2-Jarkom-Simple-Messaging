@@ -10,6 +10,7 @@
 #include <iterator>
 #include <string>
 #include <fstream>
+
 using namespace std;
 
 class UserServer{
@@ -21,8 +22,6 @@ class UserServer{
 		/* setter */
 		void setUsername(string username);
 		void setPassword(string password);
-		void setStatus(bool status);
-		void setPort(int portnumber);
 		
 		// menambah message ke dalam vector sekaligus external file
 		void addPendingMessage(Message& message);
@@ -30,25 +29,26 @@ class UserServer{
 		/* getter */
 		string getUsername();
 		string getPassword();
-		bool getStatus();
-		int getPort();
 		int getInboxSize();
 		Message& getMessage(int index);
+		int getMessageSize();
 		
 		/* other methods */	
+		void addUserFile();
 		void loadMessages();
-		void deleteMessage(int index);
+		void deleteMessage(int index); //seems unnecessary
+		void deleteAllMessages();
+		
+		static void addUserToList(const string& username, const string& pass );
 		
 	private:
 		void saveMessage(Message& message);
-		void deleteMessageFromExternalFile(string message);
-
+		void deleteMessageFromExternalFile(string message); //seems unnecessary
+		
 	private:
 		string username;
 		string password;
 		vector<Message> pendingmessages;
-		bool status;
-		int portnumber;
 };
 
 #endif	/* USERSERVER_H */

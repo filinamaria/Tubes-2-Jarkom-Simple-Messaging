@@ -173,7 +173,6 @@ void Client::processReply() {
 		temp = getMessageFromHost();
 		head = getSubstr(temp, 0, ';');
 		
-		cout << "HEAD IS " << head << endl;
 		
 		if (head=="1") {
 			argv1 = getSubstr(temp, 2, ';');
@@ -238,6 +237,7 @@ void Client::processReplyUntilStop() {
 				Message msg("","","","");
 				msg.toMessage(temp);
 				activeUser.addInbox(msg);
+				activeUser.saveMessages();
 				msg.showMessage();
 				written = true;
 			}
@@ -325,6 +325,7 @@ void Client::showMessages() {
 	
 	/* algorithm */
 	cin >> argvMessage1;
+	activeUser.showMessages();
 	messageToHost = "8;" + argvMessage1 + ";" + activeUser.getUsername();
 }
 

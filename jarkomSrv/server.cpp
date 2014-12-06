@@ -75,7 +75,7 @@ Server::Server(int portnumber) {
 		//spawn a new thread to handle client connection
 		//SrvInstance srvInst = SrvInstance((int) newconn);
 		threads.push_back(SrvInstance(newconn)); /*** == IMPORTANT == ***/
-		threads.back().start(); /*** == IMPORTANT == ***/
+		threads.back().start();
 		
 	}
 	close(sockfd);
@@ -140,6 +140,58 @@ void Server::addMessage(Message msg){
 	string pass;
 	string usr;
 	addMessageMutex.lock();
+	bool foundInUsers = false;
+	bool foundInGroups = false;
+	userlist.close();
+	userlist.open("User/list.txt", fstream::in | fstream::out | fstream::app);
+	while (getline(userlist,buf)) {
+		usr = getSubstr(buf, 0, '_');
+		pass = getSubstr(buf, 1, '_');
+		if (usr.compare(rcvr) == 0) {
+			fstream file;
+			file.open("User/" + buf + ".txt", fstream::out | fstream::app);
+			file << msg.toString() << endl;
+			file.close();
+			foundInUsers = true;
+		}
+	}
+	if (!foundInUsers) {
+		grouplist.close();
+		grouplist.open("Group/list.txt", fstream::in | fstream::out | fstream::app);
+		while (getline(grouplist,buf)) {
+			if (buf.compare(rcvr) == 0) {
+				foundInGroups = true;
+				fstream file;
+				file.open("Group/" + buf + ".txt", fstream::in);
+				string groupmember;
+				while (getline(file, groupmember)) {
+					while (getline(userlist,buf)) {
+						usr = getSubstr(buf, 0, '_');
+						if (usr == groupmember) {
+							fstream userfile;
+							userfile.open("User/" + buf + ".txt", fstream::out | fstream::app);
+							userfile << msg.toString() << endl;
+							userfile.close();
+						}
+					}
+				}
+				msg.setType(buf);
+				file << msg.toString() << endl;
+				file.close();
+			}
+		}
+	}
+	addMessageMutex.unlock();
+}
+
+/*
+ void Server::addMessage(Message msg){
+	userlist.seekg (0, userlist.beg);
+	string rcvr = msg.getReceiver();
+	string buf;
+	string pass;
+	string usr;
+	addMessageMutex.lock();
 	getline(userlist,buf);
 	usr = getSubstr(buf, 0, '_');
 	pass = getSubstr(buf, 1, '_');
@@ -160,7 +212,15 @@ void Server::addMessage(Message msg){
 		}
 		if (buf.compare(rcvr) == 0) {
 			fstream file;
-			file.open("Group/" + buf + ".txt", fstream::out | fstream::app);
+			file.open("Group/" + buf + ".txt", fstream::in);
+			string groupmember;
+			while (getline(file, groupmember)) {
+				while (getline(userlist,buf)) {
+					usr = getSubstr(buf, 0, '_');
+					pass = getSubstr(buf, 1, '_');
+					if (buf == groupmember)
+				}
+			}
 			msg.setType(buf);
 			file << msg.toString() << endl;
 			file.close();
@@ -168,6 +228,9 @@ void Server::addMessage(Message msg){
 	}
 	addMessageMutex.unlock();
 }
+ 
+ 
+ */
 
 string Server::getSubstr(const string& str, int start, char stop) {
 	string temp="";

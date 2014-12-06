@@ -8,7 +8,7 @@
 #include "srvInstance.h"
 
 SrvInstance::SrvInstance(const SrvInstance& in) {
-	cout << "SrvInstance Class Copied to new handler" << endl;
+	//cout << "SrvInstance Class Copied to new handler" << endl;
 	this->sockID = in.sockID;
 	this->messageBuf = in.messageBuf;
 	sockErrCode = 0;
@@ -32,7 +32,7 @@ void SrvInstance::start() {
 
 SrvInstance::~SrvInstance() {
     if(thrd.joinable()) thrd.join();
-	cout << "an bject thread for connection " << sockID << " nuked." << endl;
+	//cout << "an bject thread for connection " << sockID << " nuked." << endl;
 }
 
 void SrvInstance::initThread() {
@@ -182,6 +182,9 @@ void SrvInstance::logout(){
 
 void SrvInstance::rcvMessage(Message msg){
 	Server::addMessage(msg);
+	messageBuf = "4;success;";
+	sendMessageToClient();
+	sendAllPending();
 }
 
 void SrvInstance::createGroup(const string& name){

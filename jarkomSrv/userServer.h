@@ -34,7 +34,7 @@ class UserServer{
 		int getMessageSize();
 		
 		/* other methods */	
-		void addUserFile();
+		void addUserFile(const string& username, const string& password);
 		void loadMessages();
 		void deleteMessage(int index); //seems unnecessary
 		void deleteAllMessages();

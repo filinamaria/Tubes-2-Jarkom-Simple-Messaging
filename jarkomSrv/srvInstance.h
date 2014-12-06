@@ -38,6 +38,9 @@ public:
 	SrvInstance(const SrvInstance&);
 	SrvInstance(int sockid); //init new server
 	virtual ~SrvInstance();
+	
+	void start(); //START
+	
 private:
 	//Thread init function to be called ONCE
 	void initThread();
@@ -55,14 +58,12 @@ private:
 	//event handlers
 	void signup(const string& usrName, const string& pass); //DONE
 	void login(const string& usrName, const string& pass); //DONE
-	void logout(); //DUN
-	void rcvMessage(Message msg);
-	void createGroup(const string& name);
-	void joinGroup(const string& name);
-	void leaveGroup(const string& name);
-	
-	//sendMessage function
-	void sendMessageTo(const vector<string>& users, Message msg);
+	void logout(); //DONE
+	void rcvMessage(Message msg); //DONE
+	void createGroup(const string& name); //DONE
+	void joinGroup(const string& name); //DONE
+	void leaveGroup(const string& name); //DONE
+	void showMessage(const string& from); //??
 	
 	//utility functions
 	string getSubstr(const string& str, int start, char stop);

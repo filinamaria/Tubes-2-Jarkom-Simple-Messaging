@@ -38,9 +38,8 @@ public:
 	static void addMessage(Message msg);
 	static void addUserToList(const string& username, const string& pass );
 	// Group Handler Functions
-	static void deleteGroup();
 	static void addUserToGroup(const string& groupname,const string& username);
-	static void removeUserFromGroup(const string& groupname, const string username);
+	static bool removeUserFromGroup(const string& groupname, const string username);
 	
 private:
 	

@@ -35,6 +35,7 @@ class Group {
 		string getGroupName();
 		vector<string> getMemberList();
 		vector<string> getLogList();
+		int getMemberSize();
 		
 		/* other methods */
 		/* method delMember: return 0 jika gagal (user tidak ada), return 1 jika berhasil

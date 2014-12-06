@@ -19,16 +19,20 @@ SrvInstance::SrvInstance(const SrvInstance& in) {
 SrvInstance::SrvInstance(int sockid) {
 	cout << "SrvInstance Class Constructed" << endl;
 	this->sockID = sockid;
-	thrd = thread(&SrvInstance::initThread, this);
 	messageBuf = "";
 	sockErrCode = 0;
 	killFlag = false;
 	connected = false;
 }
 
+void SrvInstance::start() {
+	cout << "starting thread..." << endl;
+	thrd = thread(&SrvInstance::initThread, this);
+}
+
 SrvInstance::~SrvInstance() {
-	thrd.join();
-	cout << "Object thread for connection " << sockID << " nuked." << endl;
+    if(thrd.joinable()) thrd.join();
+	cout << "an bject thread for connection " << sockID << " nuked." << endl;
 }
 
 void SrvInstance::initThread() {
@@ -37,64 +41,73 @@ void SrvInstance::initThread() {
 	connected = true;
 	
 	cout << "Spawned and ran new thread for sockID: " << sockID << endl;
+	int invalids = 0;
 	
 	while (connected) {
 		//read a message
 		bzero(buffer, buflength);
 		n = read(sockID, buffer, buflength); /*** == IMPORTANT == ***/
-		if (n < 0)
-			error("ERROR reading from socket");
+		if (n < 0) {
+			killFlag = true;
+		}
 		int head = atoi(getSubstr(buffer, 0, ';').c_str());
 
 		//process message accordingly
 		switch (head) {
 			case 1: // signup
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to sign up: " << buffer << endl;
 				signup(getSubstrAdv(buffer, 2, ';'),getSubstrAdv(buffer, 3, ';'));
-			return;
+			break;
 			case 2: // login
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to log in: " << buffer << endl;
 				login(getSubstrAdv(buffer, 2, ';'),getSubstrAdv(buffer, 3, ';'));
-			return;
+			break;
 			case 3: // logout
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to log out: " << buffer << endl;
 				logout();
-			return;
+			break;
 			case 4: // send message
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to send message: " << buffer << endl;
-				rcvMessage(Message(	getSubstr(buffer, 1, ';'),
-									getSubstr(buffer, 2, ';'),
-									getSubstr(buffer, 4, ';'),
-									getSubstr(buffer, 5, ';')));
-			return;
+				rcvMessage(Message(	getSubstrAdv(buffer, 2, ';'),
+									getSubstrAdv(buffer, 3, ';'),
+									getSubstrAdv(buffer, 4, ';'),
+									getSubstrAdv(buffer, 5, ';')));
+			break;
 			case 5: // create group
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to create a group: " << buffer << endl;
-				createGroup(getSubstr(buffer, 1, ';'));
-			return;
+				createGroup(getSubstrAdv(buffer, 2, ';'));
+			break;
 			case 6: // join group
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to join group: " << buffer << endl;
-				joinGroup(getSubstr(buffer, 1, ';'));
-			return;
+				joinGroup(getSubstrAdv(buffer, 2, ';'));
+			break;
 			case 7: // leave group
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to leave group: " << buffer << endl;
-				leaveGroup(getSubstr(buffer, 1, ';'));
-			return;
+				leaveGroup(getSubstrAdv(buffer, 2, ';'));
+			break;
 			case 8: // show messages
+				invalids = 0;
 				cout << "sockID " << sockID << " tries to show messages: " << buffer << endl;
+				// show message is supposed to be client-side right? sorting thru client side inbox
+				// because server always send new message after each 200-capable command.
+				//showMessage(getSubstrAdv(buffer, 2, ';'));
 				sendAllPending();
-			return;
+			break;
 			default:
-				cout << "client sent an invalid command: " << buffer << endl;
-				messageBuf = "invalid"; // TODO: add to protocol
-				return;
+				invalids++;
 		}
 		
-		cout << "DBG: check for sock status" << endl;
 		//check for socket status
 		socklen_t len = sizeof(sockErrCode);
-		if (getsockopt (sockID, SOL_SOCKET, SO_ERROR, &sockErrCode, &len) != 0) {
+		if ((getsockopt (sockID, SOL_SOCKET, SO_ERROR, &sockErrCode, &len) != 0) || invalids > 10 || killFlag) {
 			cout << "sockID " << sockID << " forcefully disconnect."<< endl;
-			killFlag = true;
 			connected = false;
 		}
 	}
@@ -102,13 +115,13 @@ void SrvInstance::initThread() {
 	//close current connection
 	close(sockID);
 	cout << "Connection " << sockID << " closed." << endl;
-	terminate();
 }
 
 void SrvInstance::sendMessageToClient() {
 	if (messageBuf != "") {
 		int n;
-		n = write(sockID,messageBuf.c_str(),messageBuf.length());
+		messageBuf = messageBuf + "\n";
+		n = write(sockID,messageBuf.c_str(),buflength);
 		if (n < 0) 
 			 error("ERROR writing to socket");
 		messageBuf = "";
@@ -123,7 +136,6 @@ void SrvInstance::sendAllPending() {
 	}
 	messageBuf = "200;";
 	sendMessageToClient();
-	cout << "sendAllPending for user " << usr.getUsername() << endl;
 }
 
 /* begin main event handlers ---------------------------------------------------------- */
@@ -134,19 +146,15 @@ void SrvInstance::signup(const string& usrName, const string& pass){
 		messageBuf = "1;fail;User already existed";
 		sendMessageToClient();
 	} else {
-		usr.setUsername(usrName);
-		usr.setPassword(pass);
-		usr.addUserFile();
 		messageBuf = "1;success";
 		sendMessageToClient();
-		sendAllPending();
-		Server::writeLog(usrName + " logged in");
-		cout << usrName << " logged in" << endl;
+		usr.addUserFile(usrName, pass);
+		Server::writeLog(usrName + " signed up");
+		cout << usrName << " signed up" << endl;
 	}
 }
 
 void SrvInstance::login(const string& usrName, const string& pass){
-	cout << "User/" + usrName + "_" + pass + ".txt" << endl;
 	if (fileExists("User/" + usrName + "_" + pass + ".txt")) {
 		usr.setUsername(usrName);
 		usr.setPassword(pass);
@@ -165,15 +173,14 @@ void SrvInstance::login(const string& usrName, const string& pass){
 }
 
 void SrvInstance::logout(){
-	connected = false;
-	killFlag = true;
-	messageBuf = "3;success";
 	cout << usr.getUsername() << " logged out" << endl;
+	Server::writeLog(usr.getUsername() + " logged out");
+	messageBuf = "3;success;";
 	sendMessageToClient();
+	//connected = false;
 }
 
 void SrvInstance::rcvMessage(Message msg){
-	msg.getReceiver();
 	Server::addMessage(msg);
 }
 
@@ -183,7 +190,8 @@ void SrvInstance::createGroup(const string& name){
 	} else {
 		Server::addUserToGroup(name, usr.getUsername());
 		messageBuf = "5;success";
-		cout << usr.getUsername() << " created group " << << endl;
+		cout << usr.getUsername() << " created group " << name << endl;
+		Server::writeLog(usr.getUsername() + " created group " + name);
 	}
 	sendMessageToClient();
 	sendAllPending();
@@ -194,6 +202,7 @@ void SrvInstance::joinGroup(const string& name){
 		Server::addUserToGroup(name, usr.getUsername());
 		messageBuf = "6;success";
 		cout << usr.getUsername() << " joined group " << name << endl;
+		Server::writeLog(usr.getUsername() + " joined group " + name);
 	} else {
 		messageBuf = "6;fail;Group is nonexistent";
 	}
@@ -202,15 +211,20 @@ void SrvInstance::joinGroup(const string& name){
 }
 
 void SrvInstance::leaveGroup(const string& name){
-	
+	if (Server::removeUserFromGroup(name, usr.getUsername())){
+		messageBuf = "7;success";
+		cout << usr.getUsername() << " leaved group " << name << endl;
+		Server::writeLog(usr.getUsername() + " leaved group " + name);
+	} else {
+		messageBuf = "7;fail;User is not inside group, or Group is nonexistent";
+	}
 	sendMessageToClient();
 	sendAllPending();
 }
 
-void SrvInstance::sendMessageTo(const vector<string>& users, Message msg){
-	for(int i=0; i<users.size(); i++) {
-		//Server::
-	}
+void SrvInstance::showMessage(const string& name){
+				// show message is supposed to be client-side right? sorting thru client side inbox
+				// because server always send new message after each 200-capable command.
 }
 
 /* begin utility handlers ---------------------------------------------------------- */

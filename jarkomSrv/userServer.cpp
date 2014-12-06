@@ -59,7 +59,7 @@ void UserServer::saveMessage(Message& message){
 	}
 }
 
-void UserServer::addUserFile(){
+void UserServer::addUserFile(const string& username, const string& password){
 	string message;
 	string path = "User/" + username + "_" + password + ".txt";
 	ifstream myfile(path.c_str(), fstream::out | fstream::app);
@@ -81,7 +81,7 @@ void UserServer::loadMessages(){
 		}
 		myfile.close();
 	}
-	deleteAllMessages()
+	deleteAllMessages();
 }
 
 void UserServer::deleteMessage(int index){

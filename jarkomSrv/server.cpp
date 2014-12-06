@@ -11,13 +11,14 @@
 fstream Server::logfile("log.txt", fstream::out | fstream::app);
 mutex Server::logfileMutex;
 fstream Server::grouplist("Group/list.txt", fstream::in | fstream::out | fstream::app);
+mutex Server::grouplistMutex;
 vector<Group> Server::groups;
 fstream Server::userlist("User/list.txt", fstream::in | fstream::out | fstream::app);
 mutex Server::addMessageMutex;
 mutex Server::userlistMutex;
 
-
 Server::Server(int portnumber) {
+	
 	int sockfd, newconn;
 	socklen_t clilen;
 	struct sockaddr_in serv_addr, cli_addr;
@@ -74,6 +75,7 @@ Server::Server(int portnumber) {
 		//spawn a new thread to handle client connection
 		//SrvInstance srvInst = SrvInstance((int) newconn);
 		threads.push_back(SrvInstance(newconn)); /*** == IMPORTANT == ***/
+		threads.back().start(); /*** == IMPORTANT == ***/
 		
 	}
 	close(sockfd);
@@ -133,7 +135,7 @@ bool Server::fileExists(const string& name) {
 
 void Server::addMessage(Message msg){
 	userlist.seekg (0, userlist.beg);
-	string user = msg.getReceiver();
+	string rcvr = msg.getReceiver();
 	string buf;
 	string pass;
 	string usr;
@@ -141,21 +143,30 @@ void Server::addMessage(Message msg){
 	getline(userlist,buf);
 	usr = getSubstr(buf, 0, '_');
 	pass = getSubstr(buf, 1, '_');
-	while (usr.compare(user) != 0) {
+	while (usr.compare(rcvr) != 0) {
 		getline(userlist,buf);
 		usr = getSubstr(buf, 0, '_');
 		pass = getSubstr(buf, 1, '_');
 	}
-	if (buf.compare(user) == 0) {
-		if (fileExists("User/" + buf + "_" + pass + ".txt")) {
-			fstream userfile;
-			userfile.open("User/" + buf + "_" + pass + ".txt", fstream::out | fstream::app);
-			userfile << msg.toString() << endl;
-		}
+	if (usr.compare(rcvr) == 0) {
+		fstream file;
+		file.open("User/" + buf + ".txt", fstream::out | fstream::app);
+		file << msg.toString() << endl;
+		file.close();
 	} else {
-		//TODO: process for group
+		getline(grouplist,buf);
+		while (buf.compare(rcvr) != 0) {
+			getline(grouplist,buf);
+		}
+		if (buf.compare(rcvr) == 0) {
+			fstream file;
+			file.open("Group/" + buf + ".txt", fstream::out | fstream::app);
+			msg.setType(buf);
+			file << msg.toString() << endl;
+			file.close();
+		}
 	}
-	addMessageMutex.lock();
+	addMessageMutex.unlock();
 }
 
 string Server::getSubstr(const string& str, int start, char stop) {
@@ -173,14 +184,42 @@ void Server::addUserToList(const string& username, const string& pass ){
 	userlistMutex.unlock();
 }
 
-void Server::deleteGroup(){
-	
-}
-
 void Server::addUserToGroup(const string& groupname,const string& username){
-	
+	bool found = false;
+	grouplistMutex.lock();
+	for (int i=0; i<groups.size(); i++) {
+		if (groups[i].getGroupName() == groupname) {
+			groups[i].addMember(username);
+			found =true;
+		}
+	}
+	if (!found) {
+		//string path = "Group/" + groupname + ".txt";
+		//fstream gfile(path.c_str(), fstream::out | fstream::app);
+		//gfile << username << endl;
+		grouplist.close();
+		grouplist.open("Group/list.txt", fstream::out | fstream::app);
+		grouplist << groupname << endl;
+		grouplist.close();
+		grouplist.open("Group/list.txt", fstream::in | fstream::out | fstream::app);
+		groups.push_back(Group(groupname));
+		groups.back().addMember(username);
+	}
+	grouplistMutex.unlock();
 }
 
-void Server::removeUserFromGroup(const string& groupname, const string username){
-	
+bool Server::removeUserFromGroup(const string& groupname, const string username){
+	grouplistMutex.lock();
+	for (int i=0; i<groups.size(); i++) {
+		if (groups[i].getGroupName() == groupname) {
+			groups[i].delMember(username);
+			if (groups[i].getMemberSize() == 0) {
+				groups.erase(groups.begin()+i);
+			}
+			grouplistMutex.unlock();
+			return true;
+		}
+	}
+	grouplistMutex.unlock();
+	return false;
 }

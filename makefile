@@ -1,11 +1,24 @@
-compile : mainClient.cpp user.o client.o message.o
-	g++ -o client mainClient.cpp usero client.o message.o
 
-user.o : user.cpp user.h
-	g++ -o user.cpp
+CC=g++
 
-client.o : client.c client.h
-	g++ -o client.c
+instruction : 
+	@echo THIS MAKEFILE IS UNFINISHED. make server is not yet available
+	@echo usage:
+	@echo make client
+	@echo make server
+	@echo make clean
 
-message.o : message.cpp message.h
-	g++ -o message.cpp
+server : mainServer.cpp server.cpp userServer.cpp message.cpp group.cpp
+	g++ -o server mainServer.cpp server.cpp userServer.cpp message.cpp group.cpp -std=c++11
+
+client : mainClient.cpp client.cpp message.cpp user.cpp
+	g++ -o client mainClient.cpp client.cpp message.cpp user.cpp
+
+server.o : server.cpp
+	g++ -c server.cpp
+
+clean :
+	rm -f server client
+
+.PHONY: clean
+.PHONY: instruction

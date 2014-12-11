@@ -3,7 +3,6 @@
 UserServer::UserServer(){
 	username = "";
 	password = "";
-	status = false;
 }
 
 UserServer::UserServer(string username, string password){
@@ -24,14 +23,6 @@ void UserServer::setPassword(string password){
 	this->password = password;
 }
 
-void UserServer::setStatus(bool status){
-	this->status = status; 
-}
-
-void UserServer::setPort(int portnumber){
-	this->portnumber = portnumber;
-}
-
 void UserServer::addPendingMessage(Message& message){
 	pendingmessages.push_back(message);
 	UserServer::saveMessage(message);
@@ -46,20 +37,16 @@ string UserServer::getPassword(){
 	return password;
 }
 
-bool UserServer::getStatus(){
-	return status;
-}
-
-int UserServer::getPort(){
-	return portnumber;
-}
-
 int UserServer::getInboxSize(){
 	return pendingmessages.size();
 }
 
 Message& UserServer::getMessage(int index){
 	return pendingmessages[index];
+}
+
+int UserServer::getMessageSize(){
+	return pendingmessages.size();
 }
 
 /* other methods */
@@ -70,6 +57,13 @@ void UserServer::saveMessage(Message& message){
 		myfile << message.toString() << endl;
 		myfile.close();
 	}
+}
+
+void UserServer::addUserFile(const string& username, const string& password){
+	string message;
+	string path = "User/" + username + "_" + password + ".txt";
+	ifstream myfile(path.c_str(), fstream::out | fstream::app);
+	addUserToList(username, password);
 }
 
 void UserServer::loadMessages(){
@@ -87,12 +81,21 @@ void UserServer::loadMessages(){
 		}
 		myfile.close();
 	}
+	deleteAllMessages();
 }
 
 void UserServer::deleteMessage(int index){
 	string message = pendingmessages[index].toString();
 	UserServer::deleteMessageFromExternalFile(message);
 	pendingmessages.erase(pendingmessages.begin() + index);
+}
+
+void UserServer::deleteAllMessages() {
+	ifstream file;
+	string path = "User/" + username + "_" + password + ".txt";
+	file.open(path.c_str(), fstream::out | fstream::trunc);
+	file.close();
+	pendingmessages.erase(pendingmessages.begin(), pendingmessages.end());
 }
 
 void UserServer::deleteMessageFromExternalFile(string message){
@@ -124,4 +127,9 @@ void UserServer::deleteMessageFromExternalFile(string message){
 		out << *i << endl;
 	}
 	out.close();
+}
+
+void UserServer::addUserToList(const string& username, const string& pass ){
+	fstream userlist("User/list.txt", fstream::in | fstream::out | fstream::app);
+	userlist << username << "_" << pass << endl;
 }

@@ -33,10 +33,15 @@ string User::getPassword() {
 
 /* Other */
 void User::showMessages(string sender) {
+	int count = 0;
 	for (int i=0; i<this->inbox.size(); i++) {
 		if (inbox[i].getSender()==sender) {
 			inbox[i].showMessage();
+			count++;
 		}
+	}
+	if (count==0) {
+		cout << "no recorded message from " << sender << endl;
 	}
 }
 

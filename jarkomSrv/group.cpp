@@ -47,6 +47,10 @@ vector<string> Group::getMemberList(){
 	return member;
 }
 
+int Group::getMemberSize(){
+	return member.size();
+}
+
 vector<string> Group::getLogList(){
 	return log;
 }

@@ -144,7 +144,7 @@ void Client::commandMenu() {
 		}
 		else if (command=="show") {
 			showMessages();
-			ok = true;
+			ok = false;
 		}
 		else printf("wrong command!\n");
 	}
@@ -172,6 +172,8 @@ void Client::processReply() {
 	do { 
 		temp = getMessageFromHost();
 		head = getSubstr(temp, 0, ';');
+		
+		
 		if (head=="1") {
 			argv1 = getSubstr(temp, 2, ';');
 			if (argv1=="fail") {
@@ -184,23 +186,9 @@ void Client::processReply() {
 		}
 		else if (head=="3") {
 			argv1 = getSubstr(temp, 2, ';');
+			stop = true;
 			if (argv1=="success")
 				stop = true;
-		}
-		else { //head=="9"
-			argv1 = getSubstrInt(temp, 2, temp.length());
-			istringstream buffer(argv1);
-			int x;
-			buffer >> x;
-			setPortno(x);
-			if (connectToHost()) {
-				stop = true;
-				messageToHost = "9;success";
-			}
-			else {
-				messageToHost = "9;fail";
-			}
-			sendMessageToHost();
 		}
 	} while (!stop);
 }
@@ -234,6 +222,7 @@ void Client::processReplyUntilStop() {
 				Message msg("","","","");
 				msg.toMessage(temp);
 				activeUser.addInbox(msg);
+				activeUser.saveMessages();
 				msg.showMessage();
 				written = true;
 			}
@@ -323,7 +312,7 @@ void Client::showMessages() {
 	
 	/* algorithm */
 	cin >> argvMessage1;
-	messageToHost = "8;" + argvMessage1 + ";" + activeUser.getUsername();
+	activeUser.showMessages(argvMessage1);
 }
 
 bool Client::isUserLogged() {

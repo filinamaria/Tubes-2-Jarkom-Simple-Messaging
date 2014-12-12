@@ -14,20 +14,22 @@ SrvInstance::SrvInstance(const SrvInstance& in) {
 	sockErrCode = 0;
 	killFlag = false;
 	connected = false;
+	thrd = thread(&SrvInstance::initThread, this);
 }
 
 SrvInstance::SrvInstance(int sockid) {
-	cout << "SrvInstance Class Constructed" << endl;
+	//cout << "SrvInstance Class Constructed" << endl;
 	this->sockID = sockid;
 	messageBuf = "";
 	sockErrCode = 0;
 	killFlag = false;
 	connected = false;
+	//thrd = thread(&SrvInstance::initThread, this);
 }
 
-void SrvInstance::start() {
-	cout << "starting thread..." << endl;
-	thrd = thread(&SrvInstance::initThread, this);
+void SrvInstance::startT() {
+	//cout << "starting thread..." << endl;
+	//thrd = thread(&SrvInstance::initThread, this);
 }
 
 SrvInstance::~SrvInstance() {
@@ -56,45 +58,45 @@ void SrvInstance::initThread() {
 		switch (head) {
 			case 1: // signup
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to sign up: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to sign up: " << buffer << endl;
 				signup(getSubstrAdv(buffer, 2, ';'),getSubstrAdv(buffer, 3, ';'));
 			break;
 			case 2: // login
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to log in: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to log in: " << buffer << endl;
 				login(getSubstrAdv(buffer, 2, ';'),getSubstrAdv(buffer, 3, ';'));
 			break;
 			case 3: // logout
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to log out: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to log out: " << buffer << endl;
 				logout();
 			break;
 			case 4: // send message
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to send message: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to send message: " << buffer << endl;
 				rcvMessage(Message(	getSubstrAdv(buffer, 2, ';'),
 									getSubstrAdv(buffer, 3, ';'),
-									getSubstrAdv(buffer, 4, ';'),
-									getSubstrAdv(buffer, 5, ';')));
+									getSubstrAdv(buffer, 5, ';'),
+									"personal"));
 			break;
 			case 5: // create group
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to create a group: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to create a group: " << buffer << endl;
 				createGroup(getSubstrAdv(buffer, 2, ';'));
 			break;
 			case 6: // join group
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to join group: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to join group: " << buffer << endl;
 				joinGroup(getSubstrAdv(buffer, 2, ';'));
 			break;
 			case 7: // leave group
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to leave group: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to leave group: " << buffer << endl;
 				leaveGroup(getSubstrAdv(buffer, 2, ';'));
 			break;
 			case 8: // show messages
 				invalids = 0;
-				cout << "sockID " << sockID << " tries to show messages: " << buffer << endl;
+				//cout << "sockID " << sockID << " tries to show messages: " << buffer << endl;
 				// show message is supposed to be client-side right? sorting thru client side inbox
 				// because server always send new message after each 200-capable command.
 				//showMessage(getSubstrAdv(buffer, 2, ';'));
@@ -107,7 +109,7 @@ void SrvInstance::initThread() {
 		//check for socket status
 		socklen_t len = sizeof(sockErrCode);
 		if ((getsockopt (sockID, SOL_SOCKET, SO_ERROR, &sockErrCode, &len) != 0) || invalids > 10 || killFlag) {
-			cout << "sockID " << sockID << " forcefully disconnect."<< endl;
+			cout << "sockID " << sockID << " disconnects."<< endl;
 			connected = false;
 		}
 	}
@@ -134,6 +136,7 @@ void SrvInstance::sendAllPending() {
 		messageBuf = usr.getMessage(i).toString();
 		sendMessageToClient();
 	}
+	usr.deleteAllMessages();
 	messageBuf = "200;";
 	sendMessageToClient();
 }
@@ -150,7 +153,6 @@ void SrvInstance::signup(const string& usrName, const string& pass){
 		sendMessageToClient();
 		usr.addUserFile(usrName, pass);
 		Server::writeLog(usrName + " signed up");
-		cout << usrName << " signed up" << endl;
 	}
 }
 
@@ -158,22 +160,18 @@ void SrvInstance::login(const string& usrName, const string& pass){
 	if (fileExists("User/" + usrName + "_" + pass + ".txt")) {
 		usr.setUsername(usrName);
 		usr.setPassword(pass);
-		usr.loadMessages();
 		messageBuf = "2;success";
 		sendMessageToClient();
 		sendAllPending();
 		Server::writeLog(usrName + " logged in");
-		cout << usrName << " logged in" << endl;
 	} else {
 		messageBuf = "2;fail;Invalid user name or password";
 		Server::writeLog(usrName + " failed a log in attempt");
-		cout << usrName << " failed a log in attempt" << endl;
 		sendMessageToClient();
 	}
 }
 
 void SrvInstance::logout(){
-	cout << usr.getUsername() << " logged out" << endl;
 	Server::writeLog(usr.getUsername() + " logged out");
 	messageBuf = "3;success;";
 	sendMessageToClient();
@@ -181,6 +179,7 @@ void SrvInstance::logout(){
 }
 
 void SrvInstance::rcvMessage(Message msg){
+	Server::writeLog(usr.getUsername() + " sent message to " + msg.getReceiver());
 	Server::addMessage(msg);
 	messageBuf = "4;success;";
 	sendMessageToClient();
@@ -193,7 +192,6 @@ void SrvInstance::createGroup(const string& name){
 	} else {
 		Server::addUserToGroup(name, usr.getUsername());
 		messageBuf = "5;success";
-		cout << usr.getUsername() << " created group " << name << endl;
 		Server::writeLog(usr.getUsername() + " created group " + name);
 	}
 	sendMessageToClient();
@@ -204,7 +202,6 @@ void SrvInstance::joinGroup(const string& name){
 	if (fileExists("Group/" + name + ".txt")) {
 		Server::addUserToGroup(name, usr.getUsername());
 		messageBuf = "6;success";
-		cout << usr.getUsername() << " joined group " << name << endl;
 		Server::writeLog(usr.getUsername() + " joined group " + name);
 	} else {
 		messageBuf = "6;fail;Group is nonexistent";
@@ -216,7 +213,6 @@ void SrvInstance::joinGroup(const string& name){
 void SrvInstance::leaveGroup(const string& name){
 	if (Server::removeUserFromGroup(name, usr.getUsername())){
 		messageBuf = "7;success";
-		cout << usr.getUsername() << " leaved group " << name << endl;
 		Server::writeLog(usr.getUsername() + " leaved group " + name);
 	} else {
 		messageBuf = "7;fail;User is not inside group, or Group is nonexistent";

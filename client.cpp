@@ -227,8 +227,8 @@ void Client::processReplyUntilStop() {
 				written = true;
 			}
 		}
-		messageToHost = "200;";
-		sendMessageToHost();
+		//messageToHost = "200;";
+		//sendMessageToHost();
 		temp = getMessageFromHost();
 		head = getSubstr(temp, 0, ';');
 	}
@@ -311,6 +311,10 @@ void Client::showMessages() {
 	string argvMessage1;
 	
 	/* algorithm */
+	messageToHost = "8;" + argvMessage1;
+	sendMessageToHost();
+	processReplyUntilStop();
+	printf("Archived Message(s):\n"); 
 	cin >> argvMessage1;
 	activeUser.showMessages(argvMessage1);
 }

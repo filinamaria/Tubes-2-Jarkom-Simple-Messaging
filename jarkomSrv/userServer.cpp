@@ -71,7 +71,6 @@ void UserServer::loadMessages(){
 	string path = "User/" + username + "_" + password + ".txt";
 	ifstream myfile(path.c_str());
 	Message temp("","","","");
-	
 	while (myfile.is_open()) {
 		while (getline(myfile, message)) {
 			if(message != ""){
@@ -81,7 +80,8 @@ void UserServer::loadMessages(){
 		}
 		myfile.close();
 	}
-	deleteAllMessages();
+	myfile.open(path.c_str(), fstream::out | fstream::trunc);
+	myfile.close();
 }
 
 void UserServer::deleteMessage(int index){
@@ -91,10 +91,6 @@ void UserServer::deleteMessage(int index){
 }
 
 void UserServer::deleteAllMessages() {
-	ifstream file;
-	string path = "User/" + username + "_" + password + ".txt";
-	file.open(path.c_str(), fstream::out | fstream::trunc);
-	file.close();
 	pendingmessages.erase(pendingmessages.begin(), pendingmessages.end());
 }
 

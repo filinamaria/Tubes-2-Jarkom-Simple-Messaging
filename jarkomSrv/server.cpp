@@ -75,7 +75,8 @@ Server::Server(int portnumber) {
 		//spawn a new thread to handle client connection
 		//SrvInstance srvInst = SrvInstance((int) newconn);
 		threads.push_back(SrvInstance(newconn)); /*** == IMPORTANT == ***/
-		threads.back().start();
+		cout << "constructed, Tlen=" << threads.size() << endl;
+		threads.back().startT();
 		
 	}
 	close(sockfd);
@@ -121,6 +122,7 @@ string Server::formatCurTime(){
 void Server::writeLog(const string& message) {
 	logfileMutex.lock();
 	logfile << formatCurTime() << " " << message << endl;
+	cout << formatCurTime() << " " << message << endl;
 	logfileMutex.unlock();
 }
 
@@ -143,7 +145,7 @@ void Server::addMessage(Message msg){
 	bool foundInUsers = false;
 	bool foundInGroups = false;
 	userlist.close();
-	userlist.open("User/list.txt", fstream::in | fstream::out | fstream::app);
+	userlist.open("User/list.txt", fstream::in);
 	while (getline(userlist,buf)) {
 		usr = getSubstr(buf, 0, '_');
 		pass = getSubstr(buf, 1, '_');

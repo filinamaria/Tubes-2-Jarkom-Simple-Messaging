@@ -39,7 +39,7 @@ public:
 	SrvInstance(int sockid); //init new server
 	virtual ~SrvInstance();
 	
-	void start(); //START
+	void startT(); //START
 	
 private:
 	//Thread init function to be called ONCE
